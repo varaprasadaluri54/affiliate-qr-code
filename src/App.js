@@ -3,10 +3,10 @@ import { QRCodeCanvas } from "qrcode.react";
 import debounce from "lodash.debounce";
 
 // Imports
-import amazonLogo from "./assets/amazon.jpeg";
-import myntraLogo from "./assets/myntra.jpeg";
-import flipkartLogo from "./assets/flipkart.jpeg";
-import meeshoLogo from "./assets/meesho.jpeg";
+import amazonLogo from "./assets/amazon.png";
+import myntraLogo from "./assets/myntra.png";
+import flipkartLogo from "./assets/flipkart.png";
+import meeshoLogo from "./assets/meesho.png";
 
 export default function App() {
   const [inputValue, setInputValue] = useState("https://example.com");
@@ -96,24 +96,20 @@ export default function App() {
           </div>
         ) : (
           <div style={styles.canvasWrapper}>
-            <QRCodeCanvas
-              value={qrText}
-              size={280} // Increased size to fill the container
-              level={"H"}
-              includeMargin={false} // REMOVE THIS to eliminate the extra white gap
-              imageSettings={
-                logoKey !== "none"
-                  ? {
-                      src: logos[logoKey],
-                      height: 60,
-                      width: 60,
-                      excavate: true,
-                      crossOrigin: "anonymous",
-                    }
-                  : undefined
-              }
-            />
-          </div>
+              <QRCodeCanvas
+                value={qrText}
+                size={280}
+                level={"H"} // Must stay High
+                includeMargin={false}
+                imageSettings={{
+                  src: logos[logoKey],
+                  height: 60,
+                  width: 60,
+                  excavate: false, // Turn this OFF
+                  crossOrigin: "anonymous",
+                }}
+              />
+            </div>
         )}
       </div>
 
