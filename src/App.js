@@ -11,8 +11,8 @@ import flipkartLogo from "./assets/flipkart.png";
 import meeshoLogo from "./assets/meesho.png";
 
 export default function App() {
-  const [inputValue, setInputValue] = useState("https://example.com");
-  const [qrText, setQrText] = useState("https://example.com");
+  const [inputValue, setInputValue] = useState("https://www.amazon.com");
+  const [qrText, setQrText] = useState("https://www.amazon.com");
   const [logoKey, setLogoKey] = useState("none");
   const [isGenerating, setIsGenerating] = useState(false);
   const [fgColor, setFgColor] = useState("#000000");
@@ -81,6 +81,7 @@ export default function App() {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     name: "Free Branded QR Code Generator",
+    url: "https://affiliateqrcodegenerate.netlify.app/",
     description:
       "Generate high-quality branded QR codes for Amazon, Flipkart, and Myntra affiliate links. Boost trust and clicks with custom logo QR codes.",
     applicationCategory: "BusinessApplication",
@@ -105,7 +106,7 @@ export default function App() {
           name="keywords"
           content="QR code generator, branded QR code, Amazon affiliate tools, Flipkart QR code, custom logo QR, affiliate marketing tools"
         />
-        <link rel="canonical" href="https://qr-generator.example.com" />
+        <link rel="canonical" href="https://affiliateqrcodegenerate.netlify.app/" />
 
         {/* Social Media (Open Graph) */}
         <meta property="og:title" content="Free Branded QR Code Generator for Affiliates" />
@@ -114,7 +115,7 @@ export default function App() {
           content="Boost your affiliate sales with custom branded QR codes for Amazon, Flipkart and more."
         />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://qr-generator.example.com" />
+        <meta property="og:url" content="https://affiliateqrcodegenerate.netlify.app/" />
         <meta property="og:site_name" content="Branded QR Generator" />
 
         {/* Twitter Card */}
