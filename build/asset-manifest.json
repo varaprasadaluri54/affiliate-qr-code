@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/static/css/main.bbd4cf34.css",
+    "main.js": "/static/js/main.910dd567.js",
+    "static/media/flipkart.png": "/static/media/flipkart.b54738af98384c1396b6.png",
+    "static/media/myntra.png": "/static/media/myntra.1fa593411285ed9d9e51.png",
+    "static/media/amazon.png": "/static/media/amazon.cc6ee139cc2e26bb7821.png",
+    "static/media/meesho.png": "/static/media/meesho.58f4cf911dbfa939f8de.png",
+    "index.html": "/index.html",
+    "main.bbd4cf34.css.map": "/static/css/main.bbd4cf34.css.map",
+    "main.910dd567.js.map": "/static/js/main.910dd567.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.bbd4cf34.css",
+    "static/js/main.910dd567.js"
+  ]
+}

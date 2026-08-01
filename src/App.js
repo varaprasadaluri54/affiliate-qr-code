@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
-import { QRCodeCanvas } from "qrcode.react";
+import { QRCode } from "react-qrcode-logo";
 import debounce from "lodash.debounce";
 import { Helmet } from "react-helmet-async";
 import "./styles.css";
@@ -10,6 +10,39 @@ import myntraLogo from "./assets/myntra.png";
 import flipkartLogo from "./assets/flipkart.png";
 import meeshoLogo from "./assets/meesho.png";
 
+const brandPresets = {
+  none: {
+    fgColor: "#000000",
+    eyeColor: "#000000",
+    qrStyle: "squares",
+    eyeRadius: 0,
+  },
+  amazon: {
+    fgColor: "#111111", // Amazon Dark Carbon
+    eyeColor: "#FF9900", // Amazon Orange
+    qrStyle: "dots",
+    eyeRadius: 18,
+  },
+  myntra: {
+    fgColor: "#3E4152", // Myntra Dark Charcoal
+    eyeColor: "#FF3F6C", // Myntra Pink/Red
+    qrStyle: "dots",
+    eyeRadius: 22,
+  },
+  flipkart: {
+    fgColor: "#2874F0", // Flipkart Blue
+    eyeColor: "#FFE500", // Flipkart Yellow
+    qrStyle: "squares",
+    eyeRadius: 12,
+  },
+  meesho: {
+    fgColor: "#333333", // Dark Gray
+    eyeColor: "#F43397", // Meesho Pink
+    qrStyle: "dots",
+    eyeRadius: 20,
+  }
+};
+
 export default function App() {
   const [inputValue, setInputValue] = useState("https://example.com");
   const [qrText, setQrText] = useState("https://example.com");
@@ -17,6 +50,9 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [fgColor, setFgColor] = useState("#000000");
   const [bgColor, setBgColor] = useState("#ffffff");
+  const [eyeColor, setEyeColor] = useState("#000000");
+  const [qrStyle, setQrStyle] = useState("squares");
+  const [eyeRadiusValue, setEyeRadiusValue] = useState(0);
   const [validationError, setValidationError] = useState("");
   const qrRef = useRef();
 
@@ -52,6 +88,20 @@ export default function App() {
     }
   };
 
+  const handleLogoChange = (e) => {
+    const key = e.target.value;
+    setLogoKey(key);
+
+    // Auto-apply brand preset values
+    if (brandPresets[key]) {
+      const preset = brandPresets[key];
+      setFgColor(preset.fgColor);
+      setEyeColor(preset.eyeColor);
+      setQrStyle(preset.qrStyle);
+      setEyeRadiusValue(preset.eyeRadius);
+    }
+  };
+
   const clearInput = () => {
     setInputValue("");
     setValidationError("");
@@ -75,6 +125,29 @@ export default function App() {
       console.error("Download error:", err);
     }
   };
+
+  // Construct eye radius configuration based on state value
+  const currentEyeRadius = [
+    {
+      outer: [eyeRadiusValue, eyeRadiusValue, eyeRadiusValue, eyeRadiusValue],
+      inner: [Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2)]
+    },
+    {
+      outer: [eyeRadiusValue, eyeRadiusValue, eyeRadiusValue, eyeRadiusValue],
+      inner: [Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2)]
+    },
+    {
+      outer: [eyeRadiusValue, eyeRadiusValue, eyeRadiusValue, eyeRadiusValue],
+      inner: [Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2)]
+    }
+  ];
+
+  // Construct eye color configuration based on state value
+  const currentEyeColor = [
+    { outer: eyeColor, inner: eyeColor },
+    { outer: eyeColor, inner: eyeColor },
+    { outer: eyeColor, inner: eyeColor }
+  ];
 
   // Structured Data for Google Search (Schema.org)
   const structuredData = {
@@ -166,7 +239,7 @@ export default function App() {
           <select
             id="logo-select"
             value={logoKey}
-            onChange={(e) => setLogoKey(e.target.value)}
+            onChange={handleLogoChange}
             className="select"
             aria-label="Select Logo"
           >
@@ -177,16 +250,61 @@ export default function App() {
             <option value="meesho">Meesho</option>
           </select>
 
+          {/* QR Design Settings Grid */}
+          <div className="design-controls">
+            <div className="control-group">
+              <label htmlFor="qr-style" className="label">
+                QR Code Style
+              </label>
+              <select
+                id="qr-style"
+                value={qrStyle}
+                onChange={(e) => setQrStyle(e.target.value)}
+                className="select"
+              >
+                <option value="squares">Standard Squares</option>
+                <option value="dots">Modern Circular Dots</option>
+              </select>
+            </div>
+
+            <div className="control-group">
+              <label htmlFor="eye-radius" className="label">
+                Eye Corner Roundness ({eyeRadiusValue}px)
+              </label>
+              <input
+                id="eye-radius"
+                type="range"
+                min="0"
+                max="30"
+                value={eyeRadiusValue}
+                onChange={(e) => setEyeRadiusValue(Number(e.target.value))}
+                className="slider"
+              />
+            </div>
+          </div>
+
           <div className="color-controls">
             <div className="color-input-wrapper">
               <label htmlFor="fg-color" className="label">
-                FG Color
+                Dots Color
               </label>
               <input
                 id="fg-color"
                 type="color"
                 value={fgColor}
                 onChange={(e) => setFgColor(e.target.value)}
+                className="color-input"
+              />
+            </div>
+            <div className="color-input-wrapper">
+              <label htmlFor="eye-color" className="label">
+                Eye Color
+              </label>
+              <input
+                id="eye-color"
+                type="color"
+                value={eyeColor}
+                onChange={(e) => setEyeColor(e.target.value)}
                 className="color-input"
               />
             </div>
@@ -212,25 +330,23 @@ export default function App() {
               <span className="sr-only">Generating...</span>
             </div>
           ) : (
-            <div>
-              <QRCodeCanvas
+            <div className="qr-wrapper">
+              <QRCode
                 value={qrText || " "}
                 size={280}
-                level={"H"}
+                ecLevel="H"
                 fgColor={fgColor}
                 bgColor={bgColor}
-                includeMargin={false}
-                imageSettings={
-                  logoKey !== "none"
-                    ? {
-                        src: logos[logoKey],
-                        height: 60,
-                        width: 60,
-                        excavate: true,
-                        crossOrigin: "anonymous",
-                      }
-                    : undefined
-                }
+                qrStyle={qrStyle}
+                eyeRadius={currentEyeRadius}
+                eyeColor={currentEyeColor}
+                logoImage={logoKey !== "none" ? logos[logoKey] : undefined}
+                logoWidth={60}
+                logoHeight={60}
+                logoPadding={5}
+                logoPaddingStyle="circle"
+                removeQrCodeBehindLogo={true}
+                enableCORS={true}
               />
             </div>
           )}
