@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
-import { QRCodeCanvas } from "qrcode.react";
+import { QRCode } from "react-qrcode-logo";
 import debounce from "lodash.debounce";
 import { Helmet } from "react-helmet-async";
 import "./styles.css";
@@ -10,13 +10,66 @@ import myntraLogo from "./assets/myntra.png";
 import flipkartLogo from "./assets/flipkart.png";
 import meeshoLogo from "./assets/meesho.png";
 
+const brandPresets = {
+  custom: {
+    id: "custom",
+    name: "Custom QR",
+    fgColor: "#000000",
+    eyeColor: "#000000",
+    qrStyle: "squares",
+    eyeRadius: 0,
+    logoKey: "none"
+  },
+  flipkart: {
+    id: "flipkart",
+    name: "Flipkart",
+    fgColor: "#2874F0", // Flipkart Vibrant Blue
+    eyeColor: "#FFE500", // Flipkart Yellow
+    qrStyle: "dots",
+    eyeRadius: 15,
+    logoKey: "flipkart"
+  },
+  amazon: {
+    id: "amazon",
+    name: "Amazon",
+    fgColor: "#000000", // Black dots
+    eyeColor: "#FF9900", // Amazon Orange
+    qrStyle: "dots",
+    eyeRadius: 20,
+    logoKey: "amazon"
+  },
+  myntra: {
+    id: "myntra",
+    name: "Myntra",
+    fgColor: "#3E4152", // Myntra Charcoal
+    eyeColor: "#FF3F6C", // Myntra Pink/Red
+    qrStyle: "dots",
+    eyeRadius: 20,
+    logoKey: "myntra"
+  },
+  meesho: {
+    id: "meesho",
+    name: "Meesho",
+    fgColor: "#333333", // Dark Grey
+    eyeColor: "#F43397", // Meesho Pink
+    qrStyle: "dots",
+    eyeRadius: 20,
+    logoKey: "meesho"
+  }
+};
+
 export default function App() {
+  const [selectedBrand, setSelectedBrand] = useState("flipkart"); // Default to Flipkart to match screenshot
   const [inputValue, setInputValue] = useState("https://example.com");
   const [qrText, setQrText] = useState("https://example.com");
-  const [logoKey, setLogoKey] = useState("none");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [fgColor, setFgColor] = useState("#000000");
+
+  // Custom design overrides
+  const [fgColor, setFgColor] = useState(brandPresets.flipkart.fgColor);
   const [bgColor, setBgColor] = useState("#ffffff");
+  const [eyeColor, setEyeColor] = useState(brandPresets.flipkart.eyeColor);
+  const [qrStyle, setQrStyle] = useState(brandPresets.flipkart.qrStyle);
+  const [eyeRadiusValue, setEyeRadiusValue] = useState(brandPresets.flipkart.eyeRadius);
   const [validationError, setValidationError] = useState("");
   const qrRef = useRef();
 
@@ -25,6 +78,7 @@ export default function App() {
     myntra: myntraLogo,
     flipkart: flipkartLogo,
     meesho: meeshoLogo,
+    none: undefined
   };
 
   const debouncedUpdate = useCallback(
@@ -52,6 +106,17 @@ export default function App() {
     }
   };
 
+  const handleBrandSelect = (brandId) => {
+    setSelectedBrand(brandId);
+    const preset = brandPresets[brandId];
+    if (preset) {
+      setFgColor(preset.fgColor);
+      setEyeColor(preset.eyeColor);
+      setQrStyle(preset.qrStyle);
+      setEyeRadiusValue(preset.eyeRadius);
+    }
+  };
+
   const clearInput = () => {
     setInputValue("");
     setValidationError("");
@@ -64,10 +129,50 @@ export default function App() {
     const canvas = qrRef.current.querySelector("canvas");
     if (!canvas) return;
     try {
-      const image = canvas.toDataURL("image/png", 1.0);
+      // Create a high-quality destination canvas with rounded corners and a border
+      const size = 320;
+      const padding = 24;
+      const radius = 24;
+      const borderWidth = 1.5;
+
+      const downloadCanvas = document.createElement("canvas");
+      downloadCanvas.width = size;
+      downloadCanvas.height = size;
+      const ctx = downloadCanvas.getContext("2d");
+
+      // Draw clear background
+      ctx.clearRect(0, 0, size, size);
+
+      // Path for rounded rectangle
+      ctx.beginPath();
+      ctx.moveTo(padding / 2 + radius, padding / 2);
+      ctx.lineTo(size - padding / 2 - radius, padding / 2);
+      ctx.quadraticCurveTo(size - padding / 2, padding / 2, size - padding / 2, padding / 2 + radius);
+      ctx.lineTo(size - padding / 2, size - padding / 2 - radius);
+      ctx.quadraticCurveTo(size - padding / 2, size - padding / 2, size - padding / 2 - radius, size - padding / 2);
+      ctx.lineTo(padding / 2 + radius, size - padding / 2);
+      ctx.quadraticCurveTo(padding / 2, size - padding / 2, padding / 2, size - padding / 2 - radius);
+      ctx.lineTo(padding / 2, padding / 2 + radius);
+      ctx.quadraticCurveTo(padding / 2, padding / 2, padding / 2 + radius, padding / 2);
+      ctx.closePath();
+
+      // Fill background
+      ctx.fillStyle = bgColor || "#ffffff";
+      ctx.fill();
+
+      // Stroke border
+      ctx.strokeStyle = "#e5e7eb";
+      ctx.lineWidth = borderWidth;
+      ctx.stroke();
+
+      // Draw the QR Code centered inside the rounded card
+      const qrSize = size - padding * 2;
+      ctx.drawImage(canvas, padding, padding, qrSize, qrSize);
+
+      const image = downloadCanvas.toDataURL("image/png", 1.0);
       const anchor = document.createElement("a");
       anchor.href = image;
-      anchor.download = `branded-qr-${logoKey}.png`;
+      anchor.download = `branded-qr-${selectedBrand}.png`;
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
@@ -75,6 +180,29 @@ export default function App() {
       console.error("Download error:", err);
     }
   };
+
+  // Construct eye radius configuration based on state value
+  const currentEyeRadius = [
+    {
+      outer: [eyeRadiusValue, eyeRadiusValue, eyeRadiusValue, eyeRadiusValue],
+      inner: [Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2)]
+    },
+    {
+      outer: [eyeRadiusValue, eyeRadiusValue, eyeRadiusValue, eyeRadiusValue],
+      inner: [Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2)]
+    },
+    {
+      outer: [eyeRadiusValue, eyeRadiusValue, eyeRadiusValue, eyeRadiusValue],
+      inner: [Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2), Math.round(eyeRadiusValue / 2)]
+    }
+  ];
+
+  // Construct eye color configuration based on state value
+  const currentEyeColor = [
+    { outer: eyeColor, inner: eyeColor },
+    { outer: eyeColor, inner: eyeColor },
+    { outer: eyeColor, inner: eyeColor }
+  ];
 
   // Structured Data for Google Search (Schema.org)
   const structuredData = {
@@ -91,6 +219,9 @@ export default function App() {
       priceCurrency: "USD",
     },
   };
+
+  const activePreset = brandPresets[selectedBrand];
+  const activeLogoKey = activePreset ? activePreset.logoKey : "none";
 
   return (
     <main className="container">
@@ -129,16 +260,27 @@ export default function App() {
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
-      {/* SEO Header Section */}
-      <header className="header">
-        <h1 className="title">Professional Branded QR Code Generator</h1>
-        <p className="subtitle">
-          Create custom QR codes for Amazon, Flipkart, and Myntra affiliate links instantly.
-        </p>
-      </header>
+      {/* Brand Tabs at the very top */}
+      <nav className="brand-tabs" aria-label="Brand Selector Tabs">
+        {Object.values(brandPresets).map((preset) => {
+          const isActive = selectedBrand === preset.id;
+          return (
+            <button
+              key={preset.id}
+              onClick={() => handleBrandSelect(preset.id)}
+              className={`brand-tab brand-tab--${preset.id} ${isActive ? "active" : ""}`}
+              aria-selected={isActive}
+              role="tab"
+            >
+              {preset.name}
+            </button>
+          );
+        })}
+      </nav>
 
-      {/* Generator Tool Section */}
-      <section className="tool-section" aria-label="QR Generator Tool">
+      {/* Main Container Layout */}
+      <section className="tool-layout" aria-label="QR Generator Tool">
+        {/* Left column: Input and customization */}
         <div className="input-section">
           <label htmlFor="qr-url" className="label">
             Destination URL
@@ -151,101 +293,144 @@ export default function App() {
               onChange={handleInputChange}
               placeholder="Paste your link here..."
               className="input"
-              style={{ flex: 1, marginBottom: 0 }}
               aria-label="URL Input"
             />
-            <button onClick={clearInput} className="clear-btn">
+            <button onClick={clearInput} className="clear-btn" aria-label="Clear Input">
               Clear
             </button>
           </div>
           {validationError && <p className="validation-error">{validationError}</p>}
 
-          <label htmlFor="logo-select" className="label" style={{ marginTop: "15px" }}>
-            Choose Brand Logo
-          </label>
-          <select
-            id="logo-select"
-            value={logoKey}
-            onChange={(e) => setLogoKey(e.target.value)}
-            className="select"
-            aria-label="Select Logo"
-          >
-            <option value="none">No Logo</option>
-            <option value="amazon">Amazon</option>
-            <option value="myntra">Myntra</option>
-            <option value="flipkart">Flipkart</option>
-            <option value="meesho">Meesho</option>
-          </select>
+          <div className="advanced-options-header">
+            <h3>Advanced Styling Controls</h3>
+            <p className="help-text">Fine-tune your brand's QR style below</p>
+          </div>
+
+          {/* QR Design Settings Grid */}
+          <div className="design-controls">
+            <div className="control-group">
+              <label htmlFor="qr-style" className="label">
+                QR Code Style
+              </label>
+              <select
+                id="qr-style"
+                value={qrStyle}
+                onChange={(e) => setQrStyle(e.target.value)}
+                className="select"
+              >
+                <option value="squares">Standard Squares</option>
+                <option value="dots">Modern Circular Dots</option>
+              </select>
+            </div>
+
+            <div className="control-group">
+              <label htmlFor="eye-radius" className="label">
+                Eye Corner Roundness ({eyeRadiusValue}px)
+              </label>
+              <input
+                id="eye-radius"
+                type="range"
+                min="0"
+                max="30"
+                value={eyeRadiusValue}
+                onChange={(e) => setEyeRadiusValue(Number(e.target.value))}
+                className="slider"
+              />
+            </div>
+          </div>
 
           <div className="color-controls">
             <div className="color-input-wrapper">
               <label htmlFor="fg-color" className="label">
-                FG Color
+                Dots Color
               </label>
-              <input
-                id="fg-color"
-                type="color"
-                value={fgColor}
-                onChange={(e) => setFgColor(e.target.value)}
-                className="color-input"
-              />
+              <div className="color-picker-container">
+                <input
+                  id="fg-color"
+                  type="color"
+                  value={fgColor}
+                  onChange={(e) => setFgColor(e.target.value)}
+                  className="color-input"
+                />
+                <span className="color-hex">{fgColor}</span>
+              </div>
+            </div>
+            <div className="color-input-wrapper">
+              <label htmlFor="eye-color" className="label">
+                Eye Color
+              </label>
+              <div className="color-picker-container">
+                <input
+                  id="eye-color"
+                  type="color"
+                  value={eyeColor}
+                  onChange={(e) => setEyeColor(e.target.value)}
+                  className="color-input"
+                />
+                <span className="color-hex">{eyeColor}</span>
+              </div>
             </div>
             <div className="color-input-wrapper">
               <label htmlFor="bg-color" className="label">
                 BG Color
               </label>
-              <input
-                id="bg-color"
-                type="color"
-                value={bgColor}
-                onChange={(e) => setBgColor(e.target.value)}
-                className="color-input"
-              />
+              <div className="color-picker-container">
+                <input
+                  id="bg-color"
+                  type="color"
+                  value={bgColor}
+                  onChange={(e) => setBgColor(e.target.value)}
+                  className="color-input"
+                />
+                <span className="color-hex">{bgColor}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div ref={qrRef} className="qr-display-area">
-          {isGenerating ? (
-            <div role="status">
-              <div className="spinner"></div>
-              <span className="sr-only">Generating...</span>
-            </div>
-          ) : (
-            <div>
-              <QRCodeCanvas
-                value={qrText || " "}
-                size={280}
-                level={"H"}
-                fgColor={fgColor}
-                bgColor={bgColor}
-                includeMargin={false}
-                imageSettings={
-                  logoKey !== "none"
-                    ? {
-                        src: logos[logoKey],
-                        height: 60,
-                        width: 60,
-                        excavate: true,
-                        crossOrigin: "anonymous",
-                      }
-                    : undefined
-                }
-              />
-            </div>
-          )}
-        </div>
+        {/* Right column: QR Display Card & Download Button */}
+        <div className="display-section">
+          <div ref={qrRef} className="qr-display-card">
+            {isGenerating ? (
+              <div role="status" className="spinner-wrapper">
+                <div className="spinner"></div>
+                <span className="sr-only">Generating...</span>
+              </div>
+            ) : (
+              <div className="qr-wrapper">
+                <QRCode
+                  value={qrText || " "}
+                  size={260}
+                  ecLevel="H"
+                  fgColor={fgColor}
+                  bgColor={bgColor}
+                  qrStyle={qrStyle}
+                  eyeRadius={currentEyeRadius}
+                  eyeColor={currentEyeColor}
+                  logoImage={activeLogoKey !== "none" ? logos[activeLogoKey] : undefined}
+                  logoWidth={58}
+                  logoHeight={58}
+                  logoPadding={4}
+                  logoPaddingStyle="circle"
+                  removeQrCodeBehindLogo={true}
+                  enableCORS={true}
+                />
+              </div>
+            )}
+          </div>
 
-        <button
-          onClick={downloadQR}
-          className="download-btn"
-          aria-label="Download Branded QR Code"
-        >
-          Download PNG
-        </button>
+          <button
+            onClick={downloadQR}
+            className="download-btn-vibrant"
+            aria-label="Download Branded QR Code"
+          >
+            Download PNG
+          </button>
+        </div>
       </section>
 
       {/* SEO Content Section */}
+      <hr className="divider" />
       <article className="seo-content">
         <h2>Why Use Branded QR Codes for Affiliate Marketing?</h2>
         <p>
