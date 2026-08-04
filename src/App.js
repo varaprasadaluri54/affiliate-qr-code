@@ -71,7 +71,9 @@ export default function App() {
   const [qrStyle, setQrStyle] = useState(brandPresets.flipkart.qrStyle);
   const [eyeRadiusValue, setEyeRadiusValue] = useState(brandPresets.flipkart.eyeRadius);
   const [validationError, setValidationError] = useState("");
+  const [customLogo, setCustomLogo] = useState(null); // Custom uploaded logo file DataURL
   const qrRef = useRef();
+  const fileInputRef = useRef();
 
   const logos = {
     amazon: amazonLogo,
@@ -114,6 +116,31 @@ export default function App() {
       setEyeColor(preset.eyeColor);
       setQrStyle(preset.qrStyle);
       setEyeRadiusValue(preset.eyeRadius);
+      // Reset custom logo if preset brand is selected (otherwise it stays in memory but user gets brand logo by default)
+      if (brandId !== "custom") {
+        setCustomLogo(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleCustomLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setCustomLogo(event.target.result);
+      // Auto-select "Custom QR" when custom logo is uploaded
+      setSelectedBrand("custom");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeCustomLogo = () => {
+    setCustomLogo(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -301,6 +328,16 @@ export default function App() {
           </div>
           {validationError && <p className="validation-error">{validationError}</p>}
 
+              {/* Dynamic Affiliate Tips based on selection */}
+              <div className="affiliate-helper-tip">
+                <strong>💡 Tip for {brandPresets[selectedBrand]?.name || "Custom"}: </strong>
+                {selectedBrand === "flipkart" && "Use your Flipkart EarnKaro or affiliate tag to ensure you receive payouts on every scan."}
+                {selectedBrand === "amazon" && "Make sure your associate tag (e.g. yourname-21) is appended to the product URL."}
+                {selectedBrand === "myntra" && "Create custom Myntra affiliate links via your partner dashboard to track conversions."}
+                {selectedBrand === "meesho" && "Include your Meesho reseller/share link to track scanning customer purchases."}
+                {selectedBrand === "custom" && "Paste any valid URL. You can upload any customized square/circular icon above!"}
+              </div>
+
           <div className="advanced-options-header">
             <h3>Advanced Styling Controls</h3>
             <p className="help-text">Fine-tune your brand's QR style below</p>
@@ -337,6 +374,42 @@ export default function App() {
                 className="slider"
               />
             </div>
+          </div>
+
+          {/* Custom Icon/Logo Upload */}
+          <div className="upload-section-container">
+            <label className="label">Custom Icon / Logo</label>
+            <div className="upload-controls">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleCustomLogoUpload}
+                id="custom-logo-upload"
+                className="sr-only"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                className="upload-trigger-btn"
+              >
+                Choose Image File
+              </button>
+              {customLogo && (
+                <button
+                  type="button"
+                  onClick={removeCustomLogo}
+                  className="upload-remove-btn"
+                >
+                  Remove Logo
+                </button>
+              )}
+            </div>
+            {customLogo ? (
+              <p className="upload-status-text success">✓ Custom Logo Active</p>
+            ) : (
+              <p className="upload-status-text">No custom file chosen (defaults to brand logo)</p>
+            )}
           </div>
 
           <div className="color-controls">
@@ -407,7 +480,7 @@ export default function App() {
                   qrStyle={qrStyle}
                   eyeRadius={currentEyeRadius}
                   eyeColor={currentEyeColor}
-                  logoImage={activeLogoKey !== "none" ? logos[activeLogoKey] : undefined}
+                  logoImage={customLogo || (activeLogoKey !== "none" ? logos[activeLogoKey] : undefined)}
                   logoWidth={58}
                   logoHeight={58}
                   logoPadding={4}

@@ -164,6 +164,17 @@ body {
   font-weight: 500;
 }
 
+.affiliate-helper-tip {
+  background-color: #f3f4f6;
+  border-left: 4px solid #2874f0;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #4b5563;
+  margin-bottom: 20px;
+}
+
 /* Advanced Options Header */
 .advanced-options-header {
   border-top: 1px solid #e5e7eb;
@@ -241,6 +252,63 @@ body {
 
 .slider::-webkit-slider-thumb:hover {
   transform: scale(1.1);
+}
+
+/* Custom File Upload Styling */
+.upload-section-container {
+  border-top: 1px dashed #e5e7eb;
+  padding-top: 16px;
+  margin-top: 5px;
+  margin-bottom: 20px;
+}
+
+.upload-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.upload-trigger-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px dashed #2874f0;
+  border-radius: 8px;
+  background-color: #f0f7ff;
+  color: #2874f0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-trigger-btn:hover {
+  background-color: #e0efff;
+}
+
+.upload-remove-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid #dc2626;
+  border-radius: 8px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-remove-btn:hover {
+  background-color: #fee2e2;
+}
+
+.upload-status-text {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.upload-status-text.success {
+  color: #10b981;
+  font-weight: 600;
 }
 
 /* Color Pickers Custom Styling */
