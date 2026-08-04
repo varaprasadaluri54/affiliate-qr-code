@@ -25,7 +25,7 @@ const brandPresets = {
     name: "Flipkart",
     fgColor: "#2874F0", // Flipkart Vibrant Blue
     eyeColor: "#FFE500", // Flipkart Yellow
-    qrStyle: "squares",
+    qrStyle: "dots",
     eyeRadius: 15,
     logoKey: "flipkart"
   },
