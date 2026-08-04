@@ -129,7 +129,47 @@ export default function App() {
     const canvas = qrRef.current.querySelector("canvas");
     if (!canvas) return;
     try {
-      const image = canvas.toDataURL("image/png", 1.0);
+      // Create a high-quality destination canvas with rounded corners and a border
+      const size = 320;
+      const padding = 24;
+      const radius = 24;
+      const borderWidth = 1.5;
+
+      const downloadCanvas = document.createElement("canvas");
+      downloadCanvas.width = size;
+      downloadCanvas.height = size;
+      const ctx = downloadCanvas.getContext("2d");
+
+      // Draw clear background
+      ctx.clearRect(0, 0, size, size);
+
+      // Path for rounded rectangle
+      ctx.beginPath();
+      ctx.moveTo(padding / 2 + radius, padding / 2);
+      ctx.lineTo(size - padding / 2 - radius, padding / 2);
+      ctx.quadraticCurveTo(size - padding / 2, padding / 2, size - padding / 2, padding / 2 + radius);
+      ctx.lineTo(size - padding / 2, size - padding / 2 - radius);
+      ctx.quadraticCurveTo(size - padding / 2, size - padding / 2, size - padding / 2 - radius, size - padding / 2);
+      ctx.lineTo(padding / 2 + radius, size - padding / 2);
+      ctx.quadraticCurveTo(padding / 2, size - padding / 2, padding / 2, size - padding / 2 - radius);
+      ctx.lineTo(padding / 2, padding / 2 + radius);
+      ctx.quadraticCurveTo(padding / 2, padding / 2, padding / 2 + radius, padding / 2);
+      ctx.closePath();
+
+      // Fill background
+      ctx.fillStyle = bgColor || "#ffffff";
+      ctx.fill();
+
+      // Stroke border
+      ctx.strokeStyle = "#e5e7eb";
+      ctx.lineWidth = borderWidth;
+      ctx.stroke();
+
+      // Draw the QR Code centered inside the rounded card
+      const qrSize = size - padding * 2;
+      ctx.drawImage(canvas, padding, padding, qrSize, qrSize);
+
+      const image = downloadCanvas.toDataURL("image/png", 1.0);
       const anchor = document.createElement("a");
       anchor.href = image;
       anchor.download = `branded-qr-${selectedBrand}.png`;
