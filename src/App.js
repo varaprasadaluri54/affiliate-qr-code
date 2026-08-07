@@ -157,8 +157,8 @@ export default function App() {
     if (!canvas) return;
     try {
       // Create a high-quality destination canvas with rounded corners and a border
-      const size = 320;
-      const padding = 24;
+      const size = 304;
+      const padding = 12;
       const radius = 24;
       const borderWidth = 1.5;
 
@@ -473,7 +473,7 @@ export default function App() {
               <div className="qr-wrapper">
                 <QRCode
                   value={qrText || " "}
-                  size={260}
+                  size={280}
                   ecLevel="H"
                   fgColor={fgColor}
                   bgColor={bgColor}
