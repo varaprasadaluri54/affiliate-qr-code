@@ -487,6 +487,7 @@ export default function App() {
                   logoPaddingStyle="circle"
                   removeQrCodeBehindLogo={true}
                   enableCORS={true}
+                  quietZone={0}
                 />
               </div>
             )}
